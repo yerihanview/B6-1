@@ -104,8 +104,8 @@
     {
       "path": "RTM.md",
       "role": "Requirements traceability matrix",
-      "bytes": 6714,
-      "sha256": "e1c5765d85c1bf5f350ed3cfe90a96319d246c517d0ccc1dca9b4c32e002d3c3"
+      "bytes": 6730,
+      "sha256": "27859e82e66879279df93c30072b61839634d93534ac22c547a46eb21e1afa3b"
     },
     {
       "path": "ORDER_SHEET.md",
@@ -120,7 +120,7 @@
     "max_score": 100,
     "result": "🎉 [100점 만점 ALL PASS] 디지털 서랍장 미션 최종 점수: 100/100점",
     "exit_code": 0,
-    "verified_at": "2026-11-10T08:56:52+09:00",
+    "verified_at": "2026-11-10T08:57:46+09:00",
     "blocks": [
       {
         "name": "required_artifacts",
@@ -135,15 +135,15 @@
         "points": 20
       },
       {
-        "name": "foreign key defense",
+        "name": "foreign_key_defense",
         "points": 10
       },
       {
-        "name": "15 queries execution",
+        "name": "queries_execution",
         "points": 20
       },
       {
-        "name": "bonus documents",
+        "name": "bonus_documents",
         "points": 10
       }
     ],
@@ -260,9 +260,9 @@
         "logged_at": "20261109T235421Z"
       }
     ],
-    "human_or_orchestrator_corrections": [
-      "schema.sql: AUTOINCREMENT, created_at, join_date 명칭을 ORDER_SHEET 스펙과 일치 (Level 1 핀셋 패치)",
-      "seed.sql: 대여일을 2026년으로 정렬, 미대여 도서 2권 확보로 Q07 결과 비어있음 해소",
+    "corrections_after_generation": [
+      "schema.sql: AUTOINCREMENT·created_at·join_date를 ORDER_SHEET 스펙과 일치 (Level 1 핀셋 패치)",
+      "seed.sql: 대여일을 2026년으로 정렬, 미대여 도서 2권 확보로 Q07 빈 결과 해소",
       "queries.sql: Q13 정렬을 NULLS LAST 대신 호환 표현으로 교체",
       "docs/ERD.md: 실제 schema.sql 정의와 불일치하여 재생성",
       "docs/bonus/JOIN_VS_SUBQUERY.md: EXPLAIN QUERY PLAN 실측값으로 교체",
