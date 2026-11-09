@@ -1,0 +1,21 @@
+{
+  "generated_at": "20261109T233945Z",
+  "api_base": "https://copa.codyssey.kr/v1",
+  "runs": [
+    {
+      "model": "claude-sonnet-4",
+      "latency_s": 19.57,
+      "usage": {
+        "prompt_tokens": 5756,
+        "completion_tokens": 1848,
+        "total_tokens": 7604
+      },
+      "finish_reason": "end_turn",
+      "attempt": 1,
+      "task": "queries",
+      "files": [
+        "queries.sql"
+      ]
+    }
+  ]
+}

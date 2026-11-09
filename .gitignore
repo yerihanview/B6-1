@@ -1,0 +1,12 @@
+# 실행 중 생성되는 SQLite DB 파일 (산출물은 schema/seed/queries 로 재현)
+*.db
+*.sqlite
+*.sqlite3
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# OS
+.DS_Store

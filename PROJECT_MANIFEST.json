@@ -1,0 +1,286 @@
+{
+  "manifest_version": "1.0",
+  "mission": {
+    "id": "B6-1",
+    "title": "정보를 깔끔하게 정리하는 디지털 서랍장 만들기",
+    "course": "코디세이 AI 올인원 — 데이터베이스와 백엔드",
+    "domain": "도서관 스마트 대여/연체 관리 시스템",
+    "owner": "우광택 (@yerihanview)",
+    "repository": "https://github.com/yerihanview/B6-1",
+    "default_branch": "main"
+  },
+  "methodology": {
+    "name": "린 에이전틱 개발 방법론",
+    "version": "META_GUIDE v3.5",
+    "adrs_applied": [
+      "ADR-004",
+      "ADR-008",
+      "ADR-014",
+      "ADR-015",
+      "ADR-016",
+      "ADR-018"
+    ],
+    "pipeline": "ORDER_SHEET -> headless generation (Mode B) -> verify_sql.py (100/100) -> GitHub push"
+  },
+  "environment": {
+    "runtime": "Python 3.12.16",
+    "sqlite": "3.46.1",
+    "dependencies": "standard library only (sqlite3, os, sys, re, json, urllib)",
+    "encoding": "UTF-8 NFC / LF"
+  },
+  "artifacts": [
+    {
+      "path": "schema.sql",
+      "role": "DDL — PRAGMA FK, 4 tables, constraints, index",
+      "bytes": 1439,
+      "sha256": "20ec13b6e937b44a8ade5e567318d6c201462bc86433629d7705a81a705b24d8"
+    },
+    {
+      "path": "seed.sql",
+      "role": "DML — 50 rows Korean seed in topological order",
+      "bytes": 4676,
+      "sha256": "cbc4751e043c7ad4f8206ebaccf2671b1d44994b29cc6f1e1c10ce2e58e1871a"
+    },
+    {
+      "path": "queries.sql",
+      "role": "15 queries Q01~Q15",
+      "bytes": 4673,
+      "sha256": "cdb98a79826b4eb193b3bcd9b45965663154ff7c431be3d84296e6f9041a7882"
+    },
+    {
+      "path": "verify_sql.py",
+      "role": "100-point zero-dependency grader",
+      "bytes": 12091,
+      "sha256": "c94f2451195a6dc5b44799cd66a16e6e46386d4616ae4ffb9cd51889e818e350"
+    },
+    {
+      "path": "demo.sh",
+      "role": "5-step interactive demo runner",
+      "bytes": 9423,
+      "sha256": "d3dc51e8316d390b7b66af2a020e087b01a6a09e4a87792ee2ed75e7e0883d42"
+    },
+    {
+      "path": "docs/ERD.md",
+      "role": "Mermaid ERD and table specification",
+      "bytes": 6849,
+      "sha256": "f50a314e87b3f9b804095b8ad8caa201e3e61a0f792d0129ff67141e777225dd"
+    },
+    {
+      "path": "docs/bonus/JOIN_VS_SUBQUERY.md",
+      "role": "Bonus 1 — INNER JOIN vs EXISTS",
+      "bytes": 8944,
+      "sha256": "95fae47391711032313f66abc2786c1e512c01752206664874fdc7d6813abd80"
+    },
+    {
+      "path": "docs/bonus/INTEGRITY_VIOLATION.md",
+      "role": "Bonus 2 — FK violation reproduction",
+      "bytes": 5684,
+      "sha256": "216605131a058419573f657c884c5daa538ac8225dc18c1b9af3778db6033b34"
+    },
+    {
+      "path": "docs/bonus/KPI_REPORT.md",
+      "role": "Bonus 3 — executive KPI report",
+      "bytes": 9229,
+      "sha256": "7c7a9004e1aa70c794fdd07d5d226d7d2812cc520a22fa6761fcab4a519567ee"
+    },
+    {
+      "path": "outputs/query_results.md",
+      "role": "Executed results of 15 queries (auto-generated)",
+      "bytes": 8627,
+      "sha256": "35f74367e3dc54e61016f9f1abeeea1d853990fa947457b3b48487d544848838"
+    },
+    {
+      "path": "README.md",
+      "role": "Project overview, quickstart, demo, rubric",
+      "bytes": 16406,
+      "sha256": "ede439a70d30e9672aa64c8965fc243384596113f97be0dd2f5c8e95502d17e4"
+    },
+    {
+      "path": "SUBMISSION.md",
+      "role": "Submission pledge and artifact links",
+      "bytes": 4671,
+      "sha256": "9f2e0ec07654d38b3b253735412cb862a6bb6a670b04c1fcf49460cde373c617"
+    },
+    {
+      "path": "RTM.md",
+      "role": "Requirements traceability matrix",
+      "bytes": 6714,
+      "sha256": "e1c5765d85c1bf5f350ed3cfe90a96319d246c517d0ccc1dca9b4c32e002d3c3"
+    },
+    {
+      "path": "ORDER_SHEET.md",
+      "role": "Internal work order (not an evaluated deliverable)",
+      "bytes": 10180,
+      "sha256": "3c16ff563b09d5c9a343d519656ff8ce7b21d1fad0a3a1e7bda4caba7ba011e0"
+    }
+  ],
+  "verification": {
+    "command": "python3 verify_sql.py",
+    "score": 100,
+    "max_score": 100,
+    "result": "🎉 [100점 만점 ALL PASS] 디지털 서랍장 미션 최종 점수: 100/100점",
+    "exit_code": 0,
+    "verified_at": "2026-11-10T08:56:52+09:00",
+    "blocks": [
+      {
+        "name": "required_artifacts",
+        "points": 20
+      },
+      {
+        "name": "schema_integrity",
+        "points": 20
+      },
+      {
+        "name": "seed_data",
+        "points": 20
+      },
+      {
+        "name": "foreign key defense",
+        "points": 10
+      },
+      {
+        "name": "15 queries execution",
+        "points": 20
+      },
+      {
+        "name": "bonus documents",
+        "points": 10
+      }
+    ],
+    "smoke_test": {
+      "command": "bash demo.sh --non-interactive",
+      "exit_code": 0
+    }
+  },
+  "generation": {
+    "mode": "headless (Mode B)",
+    "api_base": "https://copa.codyssey.kr/v1",
+    "primary_model": "claude-sonnet-4",
+    "fallback_models": [
+      "gpt-5.4-mini",
+      "gpt-5.4"
+    ],
+    "script": "pipeline/generate.py",
+    "runs": [
+      {
+        "task": "schema_seed",
+        "model": "claude-sonnet-4",
+        "prompt_tokens": 5411,
+        "completion_tokens": 2698,
+        "latency_s": 39.99,
+        "attempt": 1,
+        "files": [
+          "schema.sql",
+          "seed.sql"
+        ],
+        "logged_at": "20261109T233914Z"
+      },
+      {
+        "task": "queries",
+        "model": "claude-sonnet-4",
+        "prompt_tokens": 5756,
+        "completion_tokens": 1848,
+        "latency_s": 19.57,
+        "attempt": 1,
+        "files": [
+          "queries.sql"
+        ],
+        "logged_at": "20261109T233945Z"
+      },
+      {
+        "task": "erd",
+        "model": "claude-sonnet-4",
+        "prompt_tokens": 5260,
+        "completion_tokens": 2940,
+        "latency_s": 42.87,
+        "attempt": 1,
+        "files": [
+          "docs/ERD.md"
+        ],
+        "logged_at": "20261109T234038Z"
+      },
+      {
+        "task": "bonus_join",
+        "model": "gpt-5.4-mini",
+        "prompt_tokens": 3720,
+        "completion_tokens": 1193,
+        "latency_s": 10.4,
+        "attempt": 1,
+        "files": [
+          "docs/bonus/JOIN_VS_SUBQUERY.md"
+        ],
+        "logged_at": "20261109T234405Z"
+      },
+      {
+        "task": "bonus_integrity",
+        "model": "gpt-5.4-mini",
+        "prompt_tokens": 3740,
+        "completion_tokens": 853,
+        "latency_s": 7.69,
+        "attempt": 1,
+        "files": [
+          "docs/bonus/INTEGRITY_VIOLATION.md"
+        ],
+        "logged_at": "20261109T234821Z"
+      },
+      {
+        "task": "erd",
+        "model": "claude-sonnet-4",
+        "prompt_tokens": 7980,
+        "completion_tokens": 2745,
+        "latency_s": 39.81,
+        "attempt": 1,
+        "files": [
+          "docs/ERD.md"
+        ],
+        "logged_at": "20261109T234912Z"
+      },
+      {
+        "task": "bonus_join",
+        "model": "claude-sonnet-4",
+        "prompt_tokens": 7969,
+        "completion_tokens": 3500,
+        "latency_s": 57.33,
+        "attempt": 3,
+        "files": [
+          "docs/bonus/JOIN_VS_SUBQUERY.md"
+        ],
+        "logged_at": "20261109T235223Z"
+      },
+      {
+        "task": "bonus_kpi",
+        "model": "claude-sonnet-4",
+        "prompt_tokens": 8013,
+        "completion_tokens": 3343,
+        "latency_s": 53.1,
+        "attempt": 2,
+        "files": [
+          "docs/bonus/KPI_REPORT.md"
+        ],
+        "logged_at": "20261109T235421Z"
+      }
+    ],
+    "human_or_orchestrator_corrections": [
+      "schema.sql: AUTOINCREMENT, created_at, join_date 명칭을 ORDER_SHEET 스펙과 일치 (Level 1 핀셋 패치)",
+      "seed.sql: 대여일을 2026년으로 정렬, 미대여 도서 2권 확보로 Q07 결과 비어있음 해소",
+      "queries.sql: Q13 정렬을 NULLS LAST 대신 호환 표현으로 교체",
+      "docs/ERD.md: 실제 schema.sql 정의와 불일치하여 재생성",
+      "docs/bonus/JOIN_VS_SUBQUERY.md: EXPLAIN QUERY PLAN 실측값으로 교체",
+      "docs/bonus/INTEGRITY_VIOLATION.md: 실제 실행 trace로 재작성",
+      "docs/bonus/KPI_REPORT.md: 실측 수치(회전율 0.077~0.154, 2건 4권, 연체율 26.7%)로 보정"
+    ]
+  },
+  "constraints": {
+    "backend_framework": false,
+    "api_or_ui": false,
+    "views_or_procedures_or_triggers": false,
+    "external_packages": false,
+    "secrets_in_repository": false
+  },
+  "governance": {
+    "order_sheet": "ORDER_SHEET.md (internal, not evaluated per ADR-018)",
+    "rtm": "RTM.md (38 requirements traced)",
+    "demo": "demo.sh (5 steps, ADR-014)",
+    "submission": "SUBMISSION.md"
+  }
+}

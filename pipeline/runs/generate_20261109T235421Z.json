@@ -1,0 +1,21 @@
+{
+  "generated_at": "20261109T235421Z",
+  "api_base": "https://copa.codyssey.kr/v1",
+  "runs": [
+    {
+      "model": "claude-sonnet-4",
+      "latency_s": 53.1,
+      "usage": {
+        "prompt_tokens": 8013,
+        "completion_tokens": 3343,
+        "total_tokens": 11356
+      },
+      "finish_reason": "end_turn",
+      "attempt": 2,
+      "task": "bonus_kpi",
+      "files": [
+        "docs/bonus/KPI_REPORT.md"
+      ]
+    }
+  ]
+}

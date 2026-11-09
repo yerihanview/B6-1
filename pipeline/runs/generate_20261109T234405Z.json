@@ -1,0 +1,21 @@
+{
+  "generated_at": "20261109T234405Z",
+  "api_base": "https://copa.codyssey.kr/v1",
+  "runs": [
+    {
+      "model": "gpt-5.4-mini",
+      "latency_s": 10.4,
+      "usage": {
+        "prompt_tokens": 3720,
+        "completion_tokens": 1193,
+        "total_tokens": 4913
+      },
+      "finish_reason": "stop",
+      "attempt": 1,
+      "task": "bonus_join",
+      "files": [
+        "docs/bonus/JOIN_VS_SUBQUERY.md"
+      ]
+    }
+  ]
+}

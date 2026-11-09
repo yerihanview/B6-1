@@ -1,0 +1,21 @@
+{
+  "generated_at": "20261109T234821Z",
+  "api_base": "https://copa.codyssey.kr/v1",
+  "runs": [
+    {
+      "model": "gpt-5.4-mini",
+      "latency_s": 7.69,
+      "usage": {
+        "prompt_tokens": 3740,
+        "completion_tokens": 853,
+        "total_tokens": 4593
+      },
+      "finish_reason": "stop",
+      "attempt": 1,
+      "task": "bonus_integrity",
+      "files": [
+        "docs/bonus/INTEGRITY_VIOLATION.md"
+      ]
+    }
+  ]
+}

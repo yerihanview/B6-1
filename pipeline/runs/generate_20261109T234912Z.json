@@ -1,0 +1,21 @@
+{
+  "generated_at": "20261109T234912Z",
+  "api_base": "https://copa.codyssey.kr/v1",
+  "runs": [
+    {
+      "model": "claude-sonnet-4",
+      "latency_s": 39.81,
+      "usage": {
+        "prompt_tokens": 7980,
+        "completion_tokens": 2745,
+        "total_tokens": 10725
+      },
+      "finish_reason": "end_turn",
+      "attempt": 1,
+      "task": "erd",
+      "files": [
+        "docs/ERD.md"
+      ]
+    }
+  ]
+}
