@@ -151,7 +151,7 @@
 | R-49 거버넌스 문서 보존 | GPT-5.4 **FAIL**(-2), Claude PASS | `ORDER_SHEET.md`(10,180B)·`RTM.md`(6,730B)·`PROJECT_MANIFEST.json`(8,487B) 모두 커밋 `996a6e8`에 존재(파일 목록·SHA-256 확인) | **PASS** |
 | R-50 커밋 규율·public 푸시 | 두 모델 모두 **부분** | 커밋 7개가 `feat:`/`docs:` Conventional Commits, 원격 `github.com/yerihanview/B6-1`, 공개 저장소·`main` 브랜치 확인 | **PASS** |
 | R-40 ERD 문서 | GPT-5.4 부분(출력 절단) | Claude가 문서 전문으로 Mermaid·관계선 3개·제약 명세 확인 | **PASS** |
-| R-45 demo.sh | GPT-5.4 부분(출력 절단) | Claude D2: `EXIT:0`, `CLEAN:no library.db`, `CLEAN:no tmpdir` | **PASS** |
+| R-45 demo.sh | GPT-5.4 부분(trap 삭제 증거 부족) | Claude D2: `EXIT:0`, `CLEAN:no library.db`, `CLEAN:no tmpdir` (demo.sh `trap cleanup EXIT INT TERM` 확인) | **PASS** |
 | R-04/R-17 seed 단독 실행 | GPT-5.4 부분 | 스키마 선행 시 정상 적재(정상 관행), 문구 해석 문제 | **해석 이슈** |
 | Claude C4(15쿼리 전수) | 최초 "15개 전부 syntax error" | 심사자 자체 분리 로직 결함(주석 텍스트를 SQL로 실행). 운영자 통지 후 D1에서 15개 전부 정상 확인 | **폐기·재검증** |
 
