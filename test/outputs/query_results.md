@@ -1,6 +1,6 @@
 # 15대 핵심 SQL 쿼리 실제 실행 결과 리포트
 
-> `python3 verify_sql.py`가 SQLite 인메모리 DB(schema.sql + seed.sql)에서 15개 쿼리를 순서대로 실행한 실제 출력이다.
+> `python3 test/verify_sql.py`가 SQLite 인메모리 DB(sql/schema.sql + sql/seed.sql)에서 15개 쿼리를 순서대로 실행한 실제 출력이다.
 > Q14(UPDATE)·Q15(DELETE)는 실행 자체와 영향 행 수를 기록한다.
 
 ## Q01. 특정 카테고리(컴퓨터) 도서를 가격 내림차순으로 조회

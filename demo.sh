@@ -88,7 +88,7 @@ echo -e "${YELLOW}\$ python3 -c \"schema.sql 실행\"${NC}"
 import sqlite3, sys
 db = sys.argv[1]
 conn = sqlite3.connect(db)
-conn.executescript(open("schema.sql", encoding="utf-8").read())
+conn.executescript(open("sql/schema.sql", encoding="utf-8").read())
 print(f"PRAGMA foreign_keys = {conn.execute('PRAGMA foreign_keys;').fetchone()[0]}")
 tables = [r[0] for r in conn.execute(
     "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name;")]
@@ -111,7 +111,7 @@ echo -e "${YELLOW}\$ python3 -c \"seed.sql 실행 후 행 수 집계\"${NC}"
 import sqlite3, sys
 conn = sqlite3.connect(sys.argv[1])
 conn.execute("PRAGMA foreign_keys = ON;")
-conn.executescript(open("seed.sql", encoding="utf-8").read())
+conn.executescript(open("sql/seed.sql", encoding="utf-8").read())
 total = 0
 for t in ("categories", "members", "books", "rentals"):
     n = conn.execute(f"SELECT COUNT(*) FROM {t};").fetchone()[0]
@@ -134,12 +134,12 @@ step_banner "Step 3 / 5 — queries.sql 주요 쿼리 실행 (Q05 · Q08 · Q11)
 echo -e "${YELLOW}\$ python3 -c \"queries.sql에서 Q05/Q08/Q11 추출·실행\"${NC}"
 "$PYTHON" - "$DB" <<'PY'
 import sqlite3, sys
-sys.path.insert(0, ".")
+sys.path.insert(0, "test")
 from verify_sql import parse_queries
 
 conn = sqlite3.connect(sys.argv[1])
 conn.execute("PRAGMA foreign_keys = ON;")
-blocks = {label: (purpose, stmt) for label, purpose, stmt in parse_queries(open("queries.sql", encoding="utf-8").read())}
+blocks = {label: (purpose, stmt) for label, purpose, stmt in parse_queries(open("sql/queries.sql", encoding="utf-8").read())}
 
 for label in ("Q05", "Q08", "Q11"):
     purpose, stmt = blocks[label]
@@ -185,15 +185,15 @@ echo -e "${GREEN}✔ 존재하지 않는 부모를 참조하는 INSERT가 DB 레
 pause_step
 
 # ──────────────────────────────────────────────────────────────────────────────
-step_banner "Step 5 / 5 — 무인 기계 채점 (verify_sql.py, 100점 만점)"
-echo -e "${YELLOW}\$ python3 verify_sql.py${NC}"
-"$PYTHON" verify_sql.py
+step_banner "Step 5 / 5 — 무인 기계 채점 (test/verify_sql.py, 100점 만점)"
+echo -e "${YELLOW}\$ python3 test/verify_sql.py${NC}"
+"$PYTHON" test/verify_sql.py
 echo ""
 echo -e "${GREEN}✔ 100/100 ALL PASS — 7대 산출물·스키마·시드·FK 방어·15쿼리·보너스 문서 전수 검증${NC}"
 
 # ──────────────────────────────────────────────────────────────────────────────
 echo ""
 echo -e "${BOLD}${CYAN}======================================================================${NC}"
-echo -e "${BOLD}${CYAN} ✅ 시연 완료 — 15대 쿼리 실제 결과는 outputs/query_results.md 에 있습니다.${NC}"
+echo -e "${BOLD}${CYAN} ✅ 시연 완료 — 15대 쿼리 실제 결과는 test/outputs/query_results.md 에 있습니다.${NC}"
 echo -e "${BOLD}${CYAN}    임시 DB(${DEMO_DIR})는 종료와 함께 자동 삭제됩니다.${NC}"
 echo -e "${BOLD}${CYAN}======================================================================${NC}"

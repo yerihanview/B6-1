@@ -19,11 +19,11 @@ import re
 import sqlite3
 import sys
 
-BASE = os.path.dirname(os.path.abspath(__file__))
+BASE = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 REQUIRED_FILES = [
-    "schema.sql",
-    "seed.sql",
-    "queries.sql",
+    "sql/schema.sql",
+    "sql/seed.sql",
+    "sql/queries.sql",
     "docs/ERD.md",
     "docs/bonus/JOIN_VS_SUBQUERY.md",
     "docs/bonus/INTEGRITY_VIOLATION.md",
@@ -85,9 +85,9 @@ def check_files(score: list[int]) -> None:
 
 
 def check_schema(conn: sqlite3.Connection, score: list[int]) -> None:
-    schema_sql = read("schema.sql")
+    schema_sql = read("sql/schema.sql")
     if "foreign_keys" not in schema_sql.lower():
-        print("❌ [FAIL] schema.sql 내 PRAGMA foreign_keys 선언 누락")
+        print("❌ [FAIL] sql/schema.sql 내 PRAGMA foreign_keys 선언 누락")
         raise SystemExit(1)
     try:
         conn.executescript(schema_sql)
@@ -153,9 +153,9 @@ def check_schema(conn: sqlite3.Connection, score: list[int]) -> None:
 
 def check_seed(conn: sqlite3.Connection, score: list[int]) -> None:
     try:
-        conn.executescript(read("seed.sql"))
+        conn.executescript(read("sql/seed.sql"))
     except sqlite3.Error as e:
-        print(f"❌ [FAIL] seed.sql 실행 실패: {e}")
+        print(f"❌ [FAIL] sql/seed.sql 실행 실패: {e}")
         raise SystemExit(1)
 
     counts = {}
@@ -242,7 +242,7 @@ EXPECTED_QUERY_ROWS = {
 
 
 def check_queries(conn: sqlite3.Connection, score: list[int]) -> None:
-    blocks = parse_queries(read("queries.sql"))
+    blocks = parse_queries(read("sql/queries.sql"))
     labels = [b[0] for b in blocks]
     expected = [f"Q{i:02d}" for i in range(1, 16)]
     if labels != expected:
@@ -253,7 +253,7 @@ def check_queries(conn: sqlite3.Connection, score: list[int]) -> None:
     lines = [
         "# 15대 핵심 SQL 쿼리 실제 실행 결과 리포트",
         "",
-        "> `python3 verify_sql.py`가 SQLite 인메모리 DB(schema.sql + seed.sql)에서 15개 쿼리를 순서대로 실행한 실제 출력이다.",
+        "> `python3 test/verify_sql.py`가 SQLite 인메모리 DB(sql/schema.sql + sql/seed.sql)에서 15개 쿼리를 순서대로 실행한 실제 출력이다.",
         "> Q14(UPDATE)·Q15(DELETE)는 실행 자체와 영향 행 수를 기록한다.",
         "",
     ]
@@ -306,12 +306,12 @@ def check_queries(conn: sqlite3.Connection, score: list[int]) -> None:
                 lines.append(f"*(전체 {len(rows)}행 중 상위 {MAX_ROWS_IN_REPORT}행만 표시)*")
             lines.append("")
 
-    os.makedirs(path("outputs"), exist_ok=True)
-    with open(path("outputs/query_results.md"), "w", encoding="utf-8", newline="\n") as f:
+    os.makedirs(path("test/outputs"), exist_ok=True)
+    with open(path("test/outputs/query_results.md"), "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(lines).rstrip() + "\n")
 
     print("✔ [PASS] 15대 핵심 쿼리 전수 실행 성공 및 결과 리포트 자동 추출 (+20점)")
-    print("   └ INFO outputs/query_results.md 재생성 완료")
+    print("   └ INFO test/outputs/query_results.md 재생성 완료")
     score[0] += 20
 
 
