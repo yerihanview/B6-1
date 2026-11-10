@@ -108,6 +108,9 @@ def check_schema(conn: sqlite3.Connection, score: list[int]) -> None:
         pk = [ c[1] for c in cols if c[5] ]
         if not pk:
             problems.append(f"{t}: PK 없음")
+        notnull_count = sum(1 for c in cols if c[3] == 1)
+        if notnull_count < 2:
+            problems.append(f"{t}: NOT NULL 컬럼 부족 ({notnull_count}개, 최소 2개 이상 필요)")
     fk_total = sum(len(list(conn.execute(f"PRAGMA foreign_key_list({t});"))) for t in EXPECTED_TABLES)
     if fk_total < 3:
         problems.append(f"외래키 부족: {fk_total}개 (최소 3개)")
@@ -119,12 +122,25 @@ def check_schema(conn: sqlite3.Connection, score: list[int]) -> None:
     if not email_unique:
         problems.append("members.email UNIQUE 없음")
 
+    cat_unique = any(
+        idx[2] == 1 and any(c[2] == "category_name" for c in conn.execute(f"PRAGMA index_info('{idx[1]}');"))
+        for idx in conn.execute("PRAGMA index_list(categories);")
+    )
+    if not cat_unique:
+        problems.append("categories.category_name UNIQUE 없음")
+
     indexes = [r[0] for r in conn.execute(
         "SELECT name FROM sqlite_master WHERE type='index' AND tbl_name='rentals';")]
     date_index = [ix for ix in indexes if "rental_date" in [
         c[2] for c in conn.execute(f"PRAGMA index_info('{ix}');")]]
     if not date_index:
         problems.append("rentals(rental_date) 인덱스 없음")
+
+    # DDL 텍스트 레벨 CHECK 제약 존재성 정적 감사
+    if "price >= 0" not in schema_sql:
+        problems.append("books(price) CHECK (price >= 0) 누락")
+    if "status in" not in schema_sql.lower():
+        problems.append("rentals(status) CHECK (status IN (...)) 누락")
 
     if problems:
         print(f"❌ [FAIL] 스키마 무결성 결함: {problems}")
@@ -172,27 +188,57 @@ def check_seed(conn: sqlite3.Connection, score: list[int]) -> None:
     score[0] += 20
 
 
-def check_fk(conn: sqlite3.Connection, score: list[int]) -> None:
+def check_integrity_constraints(conn: sqlite3.Connection, score: list[int]) -> None:
+    """적대적 음성 테스트(Mutation Testing): 6대 제약조건 위반 시 IntegrityError 발생 여부를 실증한다."""
     if conn.execute("PRAGMA foreign_keys;").fetchone()[0] != 1:
         print("❌ [FAIL] 채점 세션에서 외래키 강제가 꺼져 있음")
         raise SystemExit(1)
-    try:
-        conn.execute(
-            "INSERT INTO rentals (member_id, book_id, rental_date, due_date, status) "
-            "VALUES (9999, 9999, '2026-11-10', '2026-11-24', 'RENTED');")
-        print("❌ [FAIL] 외래키 무결성 위반 감지 실패 (미등록 ID 삽입 허용됨)")
-        raise SystemExit(1)
-    except sqlite3.IntegrityError as e:
-        if "FOREIGN KEY" not in str(e).upper():
-            print(f"❌ [FAIL] 예상과 다른 무결성 오류: {e}")
+
+    mutations = [
+        ("유령 외래키(FK) 차단",
+         "INSERT INTO rentals (member_id, book_id, rental_date, due_date, status) VALUES (9999, 9999, '2026-11-10', '2026-11-24', 'RENTED');",
+         "FOREIGN KEY"),
+        ("음수 도서 정가(price CHECK) 차단",
+         "INSERT INTO books (category_id, title, author, publisher, published_year, price) VALUES (1, '음수책', '작가', '출판사', 2026, -5000);",
+         "CHECK"),
+        ("잘못된 대여 상태(status CHECK) 차단",
+         "INSERT INTO rentals (member_id, book_id, rental_date, due_date, status) VALUES (1, 1, '2026-11-10', '2026-11-24', 'LOST');",
+         "CHECK"),
+        ("중복 카테고리명(category_name UNIQUE) 차단",
+         "INSERT INTO categories (category_name) VALUES ('소설');",
+         "UNIQUE"),
+        ("중복 회원 이메일(email UNIQUE) 차단",
+         "INSERT INTO members (name, email, phone, address, join_date) VALUES ('홍길동', 'minjun.kim@email.com', '010-0000-0000', '서울', '2026-01-01');",
+         "UNIQUE"),
+        ("NOT NULL 컬럼 누락 차단",
+         "INSERT INTO categories (category_name, created_at) VALUES (NULL, '2026-01-01');",
+         "NOT NULL"),
+    ]
+
+    for label, stmt, expected_kw in mutations:
+        try:
+            conn.execute(stmt)
+            print(f"❌ [FAIL] 적대적 음성 검증 실패: {label} (위반 삽입이 허용됨)")
             raise SystemExit(1)
-    print("✔ [PASS] 유령 외래키(FK) 삽입 시 IntegrityError 정상 차단 확인 (+10점)")
+        except sqlite3.IntegrityError as e:
+            if expected_kw and expected_kw not in str(e).upper():
+                print(f"❌ [FAIL] {label} 에러 키워드 불일치: 기대 '{expected_kw}', 실제 '{e}'")
+                raise SystemExit(1)
+
+    print("✔ [PASS] 6대 무결성 제약조건 적대적 음성 테스트(Mutation) 전수 차단 확인 (+10점)")
     score[0] += 10
 
 
 def md_escape(value: object) -> str:
     text = "" if value is None else str(value)
     return text.replace("|", "\\|").replace("\n", " ")
+
+
+EXPECTED_QUERY_ROWS = {
+    "Q01": 2, "Q02": 4, "Q03": 5, "Q04": 2, "Q05": 13,
+    "Q06": 4, "Q07": 2, "Q08": 12, "Q09": 10, "Q10": 4,
+    "Q11": 9, "Q12": 5, "Q13": 12, "Q14": 1, "Q15": 1,
+}
 
 
 def check_queries(conn: sqlite3.Connection, score: list[int]) -> None:
@@ -220,18 +266,33 @@ def check_queries(conn: sqlite3.Connection, score: list[int]) -> None:
             print(f"❌ [FAIL] {label} 쿼리 실행 실패: {e}\n   SQL: {stmt[:200]}")
             raise SystemExit(1)
 
+        expected_count = EXPECTED_QUERY_ROWS.get(label)
+        if cur.description is None:
+            if expected_count is not None and cur.rowcount != expected_count:
+                print(f"❌ [FAIL] {label} 영향 행 수 불일치: 기대 {expected_count}행, 실제 {cur.rowcount}행")
+                raise SystemExit(1)
+            lines.append(f"## {label}. {purpose}")
+            lines.append("")
+            lines.append("```sql")
+            lines.append(stmt.rstrip())
+            lines.append("```")
+            lines.append("")
+            lines.append(f"**실행 결과**: {cur.rowcount}행 영향 (단언 일치)")
+            lines.append("")
+            continue
+
+        if expected_count is not None and len(rows) != expected_count:
+            print(f"❌ [FAIL] {label} 반환 행 수 불일치: 기대 {expected_count}행, 실제 {len(rows)}행")
+            raise SystemExit(1)
+
         lines.append(f"## {label}. {purpose}")
         lines.append("")
         lines.append("```sql")
         lines.append(stmt.rstrip())
         lines.append("```")
         lines.append("")
-        if cur.description is None:
-            lines.append(f"**실행 결과**: {cur.rowcount}행 영향")
-            lines.append("")
-            continue
         columns = [d[0] for d in cur.description]
-        lines.append(f"**반환 행 수**: {len(rows)}")
+        lines.append(f"**반환 행 수**: {len(rows)} (단언 일치)")
         lines.append("")
         if rows:
             lines.append("| " + " | ".join(md_escape(c) for c in columns) + " |")
@@ -293,7 +354,7 @@ def run_verification() -> bool:
     try:
         check_schema(conn, score)
         check_seed(conn, score)
-        check_fk(conn, score)
+        check_integrity_constraints(conn, score)
         check_queries(conn, score)
     finally:
         conn.close()

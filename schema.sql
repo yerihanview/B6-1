@@ -3,7 +3,7 @@ PRAGMA foreign_keys = ON;
 CREATE TABLE categories (
     category_id   INTEGER PRIMARY KEY AUTOINCREMENT,
     category_name TEXT    NOT NULL UNIQUE,
-    created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE members (

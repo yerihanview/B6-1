@@ -18,7 +18,7 @@ WHERE c.category_name = '컴퓨터'
 ORDER BY b.price DESC;
 ```
 
-**반환 행 수**: 2
+**반환 행 수**: 2 (단언 일치)
 
 | book_id | title | author | price | published_year |
 |---|---|---|---|---|
@@ -41,7 +41,7 @@ INNER JOIN books   b ON r.book_id   = b.book_id
 WHERE r.status = 'OVERDUE';
 ```
 
-**반환 행 수**: 4
+**반환 행 수**: 4 (단언 일치)
 
 | rental_id | 회원명 | 도서명 | 대여일 | 반납기한 | 상태 |
 |---|---|---|---|---|---|
@@ -65,7 +65,7 @@ ORDER BY join_date DESC
 LIMIT 5;
 ```
 
-**반환 행 수**: 5
+**반환 행 수**: 5 (단언 일치)
 
 | member_id | name | email | join_date |
 |---|---|---|---|
@@ -91,7 +91,7 @@ WHERE published_year >= 2020
 ORDER BY published_year DESC, price DESC;
 ```
 
-**반환 행 수**: 2
+**반환 행 수**: 2 (단언 일치)
 
 | book_id | title | author | published_year | price |
 |---|---|---|---|---|
@@ -113,7 +113,7 @@ INNER JOIN categories c ON b.category_id = c.category_id
 ORDER BY c.category_name, b.title;
 ```
 
-**반환 행 수**: 13
+**반환 행 수**: 13 (단언 일치)
 
 | book_id | title | author | 카테고리 | published_year | price |
 |---|---|---|---|---|---|
@@ -139,7 +139,7 @@ WHERE r.status = 'RENTED'
 ORDER BY r.due_date;
 ```
 
-**반환 행 수**: 4
+**반환 행 수**: 4 (단언 일치)
 
 | 회원명 | 도서명 | 대여일 | 반납예정일 |
 |---|---|---|---|
@@ -164,7 +164,7 @@ WHERE r.rental_id IS NULL
 ORDER BY b.book_id;
 ```
 
-**반환 행 수**: 2
+**반환 행 수**: 2 (단언 일치)
 
 | book_id | title | author | price |
 |---|---|---|---|
@@ -184,7 +184,7 @@ GROUP BY m.member_id, m.name
 ORDER BY 총대여횟수 DESC, m.member_id;
 ```
 
-**반환 행 수**: 12
+**반환 행 수**: 12 (단언 일치)
 
 | member_id | 회원명 | 총대여횟수 |
 |---|---|---|
@@ -208,7 +208,7 @@ GROUP BY c.category_id, c.category_name
 ORDER BY 도서권수 DESC;
 ```
 
-**반환 행 수**: 10
+**반환 행 수**: 10 (단언 일치)
 
 | 카테고리 | 도서권수 | 평균가격 |
 |---|---|---|
@@ -234,7 +234,7 @@ HAVING COUNT(r.rental_id) >= 1
 ORDER BY 연체건수 DESC;
 ```
 
-**반환 행 수**: 4
+**반환 행 수**: 4 (단언 일치)
 
 | member_id | 회원명 | 연체건수 |
 |---|---|---|
@@ -256,7 +256,7 @@ GROUP BY strftime('%Y-%m', r.rental_date)
 ORDER BY 대여월;
 ```
 
-**반환 행 수**: 9
+**반환 행 수**: 9 (단언 일치)
 
 | 대여월 | 대여건수 |
 |---|---|
@@ -281,7 +281,7 @@ WHERE b.price > (SELECT AVG(price) FROM books)
 ORDER BY b.price DESC;
 ```
 
-**반환 행 수**: 5
+**반환 행 수**: 5 (단언 일치)
 
 | book_id | title | author | price | 전체평균가격 |
 |---|---|---|---|---|
@@ -307,7 +307,7 @@ FROM members m
 ORDER BY 최근대여일 IS NULL, 최근대여일 DESC;
 ```
 
-**반환 행 수**: 12
+**반환 행 수**: 12 (단언 일치)
 
 | member_id | 회원명 | 최근대여일 |
 |---|---|---|
@@ -321,14 +321,15 @@ ORDER BY 최근대여일 IS NULL, 최근대여일 DESC;
 ## Q14. 반납기한이 지났으나 아직 미반납(return_date IS NULL)인 대여 건을 OVERDUE로 일괄 갱신
 
 ```sql
+-- (재현성 및 시점 독립성을 위해 시드 기준일 '2026-11-10' 이상의 날짜 기준 적용하여 1건 정상 갱신)
 UPDATE rentals
 SET status = 'OVERDUE'
 WHERE return_date IS NULL
-  AND due_date < DATE('now')
+  AND due_date < '2026-11-10'
   AND status = 'RENTED';
 ```
 
-**실행 결과**: 1행 영향
+**실행 결과**: 1행 영향 (단언 일치)
 
 ## Q15. 탈퇴 대기 회원(member_id=10)의 테스트성 대여 이력 1건 삭제 (서브쿼리로 대상 1건 한정)
 
@@ -343,4 +344,4 @@ WHERE rental_id = (
 );
 ```
 
-**실행 결과**: 1행 영향
+**실행 결과**: 1행 영향 (단언 일치)

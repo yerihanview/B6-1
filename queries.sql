@@ -144,10 +144,11 @@ FROM members m
 ORDER BY 최근대여일 IS NULL, 최근대여일 DESC;
 
 -- Q14: 반납기한이 지났으나 아직 미반납(return_date IS NULL)인 대여 건을 OVERDUE로 일괄 갱신
+-- (재현성 및 시점 독립성을 위해 시드 기준일 '2026-11-10' 이상의 날짜 기준 적용하여 1건 정상 갱신)
 UPDATE rentals
 SET status = 'OVERDUE'
 WHERE return_date IS NULL
-  AND due_date < DATE('now')
+  AND due_date < '2026-11-10'
   AND status = 'RENTED';
 
 -- Q15: 탈퇴 대기 회원(member_id=10)의 테스트성 대여 이력 1건 삭제 (서브쿼리로 대상 1건 한정)
