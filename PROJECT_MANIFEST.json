@@ -93,7 +93,7 @@
       "path": "README.md",
       "role": "Project overview, quickstart, demo, rubric",
       "bytes": 16406,
-      "sha256": "ede439a70d30e9672aa64c8965fc243384596113f97be0dd2f5c8e95502d17e4"
+      "sha256": "11ba5e0a97a4a8877b0875215f9fef09c4d02fa551fbb6bc69263881ff89a51d"
     },
     {
       "path": "SUBMISSION.md",
@@ -120,7 +120,7 @@
     "max_score": 100,
     "result": "🎉 [100점 만점 ALL PASS] 디지털 서랍장 미션 최종 점수: 100/100점",
     "exit_code": 0,
-    "verified_at": "2026-11-10T08:57:46+09:00",
+    "verified_at": "2026-11-10T09:02:25+09:00",
     "blocks": [
       {
         "name": "required_artifacts",

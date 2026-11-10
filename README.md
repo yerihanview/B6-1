@@ -51,10 +51,6 @@ B6-1/
 
 ```mermaid
 erDiagram
-    categories ||--o{ books : "1:N 분류"
-    members    ||--o{ rentals : "1:N 대여"
-    books      ||--o{ rentals : "1:N 대여"
-
     categories {
         INTEGER category_id PK
         TEXT category_name
@@ -86,6 +82,10 @@ erDiagram
         TEXT return_date
         TEXT status
     }
+
+    categories ||--o{ books : "1:N 분류"
+    members    ||--o{ rentals : "1:N 대여"
+    books      ||--o{ rentals : "1:N 대여"
 ```
 
 전체 컬럼 명세·제약조건·정규화 근거는 **[docs/ERD.md](docs/ERD.md)** 참조.
