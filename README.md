@@ -43,9 +43,12 @@
 | **시드 데이터 DML** | [`sql/seed.sql`](sql/seed.sql) | 부모→자식 위상정렬 한국어 데이터 50행 적재 |
 | **15대 쿼리 DQL/DML** | [`sql/queries.sql`](sql/queries.sql) | 기본·조인·집계·서브쿼리·수정/삭제 15대 쿼리 |
 | **데이터 모델 ERD** | [`docs/ERD.md`](docs/ERD.md) | Mermaid ERD 다이어그램 및 테이블 상세 명세서 |
-| **보너스 1** | [`bonus/JOIN_VS_SUBQUERY.md`](bonus/JOIN_VS_SUBQUERY.md) | INNER JOIN vs EXISTS 실행계획 및 성능 1:1 대조 |
-| **보너스 2** | [`bonus/INTEGRITY_VIOLATION.md`](bonus/INTEGRITY_VIOLATION.md) | 외래키 참조 무결성 파괴 실측 trace 및 해결 3책 |
-| **보너스 3** | [`bonus/KPI_REPORT.md`](bonus/KPI_REPORT.md) | 도서관 운영 경영진을 위한 3대 핵심 KPI 리포트 |
+| **보너스 1 리포트** | [`bonus/JOIN_VS_SUBQUERY.md`](bonus/JOIN_VS_SUBQUERY.md) | INNER JOIN vs EXISTS 실행계획 및 성능 1:1 대조 |
+| **보너스 1 실측 러너** | [`bonus/run_bonus1.py`](bonus/run_bonus1.py) | JOIN vs EXISTS 실행계획 및 10명 반환 실측 대조 실행 스크립트 |
+| **보너스 2 리포트** | [`bonus/INTEGRITY_VIOLATION.md`](bonus/INTEGRITY_VIOLATION.md) | 외래키 참조 무결성 파괴 실측 trace 및 해결 3책 |
+| **보너스 2 실측 러너** | [`bonus/run_bonus2.py`](bonus/run_bonus2.py) | 유령 회원 INSERT 차단 및 FK OFF 대조 실측 실행 스크립트 |
+| **보너스 3 리포트** | [`bonus/KPI_REPORT.md`](bonus/KPI_REPORT.md) | 도서관 운영 경영진을 위한 3대 핵심 KPI 리포트 |
+| **보너스 3 실측 러너** | [`bonus/run_bonus3.py`](bonus/run_bonus3.py) | 경영진 3대 KPI 리포트 실측 지표 산출 실행 스크립트 |
 | **시연 스크립트** | [`demo.sh`](demo.sh) | 5단계 시연 자동화 러너 (대화형 및 비대화형) |
 
 ### 2-2. 리포지토리 폴더 구조
@@ -58,9 +61,12 @@ B6-1/
 │   ├── seed.sql                   # DML: 한국어 시드 데이터 50행
 │   └── queries.sql                # DQL/DML: 15대 핵심 쿼리 (Q01~Q15)
 ├── bonus/                         # 🎁 공식 보너스 과제 산출물
-│   ├── JOIN_VS_SUBQUERY.md        # 보너스 1: JOIN vs EXISTS 심층 비교
-│   ├── INTEGRITY_VIOLATION.md     # 보너스 2: 외래키 위반 실증 및 해결책
-│   └── KPI_REPORT.md              # 보너스 3: 경영진 KPI 지표 리포트
+│   ├── JOIN_VS_SUBQUERY.md        # 보너스 1: JOIN vs EXISTS 심층 비교 리포트
+│   ├── run_bonus1.py              # 보너스 1: 실행계획 대조 실측 러너
+│   ├── INTEGRITY_VIOLATION.md     # 보너스 2: 외래키 위반 실증 및 해결책 리포트
+│   ├── run_bonus2.py              # 보너스 2: 외래키 파괴 실측 러너
+│   ├── KPI_REPORT.md              # 보너스 3: 경영진 KPI 지표 리포트
+│   └── run_bonus3.py              # 보너스 3: 3대 KPI 산출 실측 러너
 ├── docs/                          # 📚 설계 문서 및 내부 개발 기록
 │   ├── ERD.md                     # 데이터 모델 Mermaid ERD
 │   ├── DEMO_SCENARIO.md           # 시연 검증 시나리오 (자동/수동 실행 가이드)
@@ -98,14 +104,21 @@ B6-1/
 | **3대 보너스 과제** | JOIN 비교, 참조 무결성 위반, 경영진 KPI 리포트 | [`bonus/`](bonus/) — `JOIN_VS_SUBQUERY.md`, `INTEGRITY_VIOLATION.md`, `KPI_REPORT.md` 심층 분석 |
 
 ### 2-6. 결과물 실행 방법
-1. **간편 시연 (원스크립트 실행)**:
+1. **간편 시연 (원스크립트 5단계 + 보너스 3종 실행)**:
    ```bash
    bash demo.sh
    ```
    - 5단계 시연이 순차적으로 진행됩니다. (엔터를 누르면 다음 단계로 진행)
    - 비대화형 일괄 실행: `bash demo.sh --non-interactive`
 
-2. **개별 SQL 파일 직접 실행 (SQLite CLI)**:
+2. **보너스 과제 3종 개별 실측 실행**:
+   ```bash
+   python3 bonus/run_bonus1.py   # 보너스 1: JOIN vs EXISTS 실행계획 대조
+   python3 bonus/run_bonus2.py   # 보너스 2: 외래키 무결성 파괴 및 FK OFF 대조 실증
+   python3 bonus/run_bonus3.py   # 보너스 3: 경영진 3대 KPI 실측 지표 산출
+   ```
+
+3. **개별 SQL 파일 직접 실행 (SQLite CLI)**:
    ```bash
    sqlite3 library.db < sql/schema.sql
    sqlite3 library.db < sql/seed.sql
