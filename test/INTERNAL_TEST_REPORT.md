@@ -11,7 +11,7 @@
 
 | 블록 | 검증 항목 | 배점 | 판정 | 실측 세부 증적 |
 |---|---|:---:|:---:|---|
-| **블록 1** | 7대 필수 산출물 파일 전수 존재 | 20 | **PASS** | `sql/schema.sql`, `sql/seed.sql`, `sql/queries.sql`, `docs/ERD.md`, `docs/bonus/` 3종 전수 확인 |
+| **블록 1** | 7대 필수 산출물 파일 전수 존재 | 20 | **PASS** | `sql/schema.sql`, `sql/seed.sql`, `sql/queries.sql`, `docs/ERD.md`, `bonus/` 3종 전수 확인 |
 | **블록 2** | 스키마 생성 및 DDL 무결성 | 20 | **PASS** | 4개 테이블 생성, PK 4개, FK 3개, `rentals(rental_date)` 인덱스(`idx_rentals_date`) 확인 |
 | **블록 3** | 시드 데이터 정량 및 상태 다양성 | 20 | **PASS** | 총 50행 (categories 10, members 12, books 13, rentals 15), 상태 3종, 복수 대여 회원 4명 |
 | **블록 4** | 6대 적대적 음성 변조 테스트 (Mutation) | 10 | **PASS** | 가짜 데이터 고의 주입 시 전수 `IntegrityError` 정상 발생 차단 확인 |

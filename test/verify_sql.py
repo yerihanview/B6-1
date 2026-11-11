@@ -25,14 +25,14 @@ REQUIRED_FILES = [
     "sql/seed.sql",
     "sql/queries.sql",
     "docs/ERD.md",
-    "docs/bonus/JOIN_VS_SUBQUERY.md",
-    "docs/bonus/INTEGRITY_VIOLATION.md",
-    "docs/bonus/KPI_REPORT.md",
+    "bonus/JOIN_VS_SUBQUERY.md",
+    "bonus/INTEGRITY_VIOLATION.md",
+    "bonus/KPI_REPORT.md",
 ]
 BONUS_FILES = [
-    "docs/bonus/JOIN_VS_SUBQUERY.md",
-    "docs/bonus/INTEGRITY_VIOLATION.md",
-    "docs/bonus/KPI_REPORT.md",
+    "bonus/JOIN_VS_SUBQUERY.md",
+    "bonus/INTEGRITY_VIOLATION.md",
+    "bonus/KPI_REPORT.md",
 ]
 EXPECTED_TABLES = ("categories", "members", "books", "rentals")
 MAX_ROWS_IN_REPORT = 3
