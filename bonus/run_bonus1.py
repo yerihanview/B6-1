@@ -22,6 +22,17 @@ def init_db():
         conn.executescript(f.read())
     return conn
 
+def show_query(conn, sql):
+    print("\n[SQL 원문]\n" + sql.strip() + "\n")
+    cur = conn.execute(sql)
+    rows = cur.fetchall()
+    print("[실행 결과]")
+    print(" | ".join(col[0] for col in cur.description))
+    for row in rows:
+        print(" | ".join("NULL" if x is None else str(x) for x in row))
+    print(f"반환 {len(rows)}행")
+    return rows
+
 def main():
     print("=" * 70)
     print(" 🎁 [보너스 1] INNER JOIN vs EXISTS 서브쿼리 실행계획 및 결과 대조")
@@ -55,18 +66,12 @@ def main():
     """
 
     print("\n[1] 방법 A: INNER JOIN + DISTINCT 실행")
-    rows_join = conn.execute(sql_join).fetchall()
+    rows_join = show_query(conn, sql_join)
     print(f"  반환 행수: {len(rows_join)}행")
-    for r in rows_join[:3]:
-        print(f"  - {r}")
-    print("  ... 외 7행")
 
     print("\n[2] 방법 B: EXISTS 상관 서브쿼리 실행")
-    rows_exists = conn.execute(sql_exists).fetchall()
+    rows_exists = show_query(conn, sql_exists)
     print(f"  반환 행수: {len(rows_exists)}행")
-    for r in rows_exists[:3]:
-        print(f"  - {r}")
-    print("  ... 외 7행")
 
     # 결과 일치성 검증
     is_identical = (rows_join == rows_exists)
@@ -74,13 +79,11 @@ def main():
 
     print("\n[3] 실행 계획 (EXPLAIN QUERY PLAN) 대조")
     print("  ▶ INNER JOIN 실행 계획:")
-    for plan in conn.execute("EXPLAIN QUERY PLAN " + sql_join).fetchall():
-        print(f"    - {plan[3]}")
+    show_query(conn, "EXPLAIN QUERY PLAN " + sql_join)
     print("    ※ 특징: 대여 이력이 많은 경우 조인 중간 결과가 비대해져 TEMP B-TREE(임시 정렬 트리) 비용 발생")
 
     print("\n  ▶ EXISTS 서브쿼리 실행 계획:")
-    for plan in conn.execute("EXPLAIN QUERY PLAN " + sql_exists).fetchall():
-        print(f"    - {plan[3]}")
+    show_query(conn, "EXPLAIN QUERY PLAN " + sql_exists)
     print("    ※ 특징: 일치하는 행을 1건만 찾으면 즉시 탐색을 멈추는 Early Stop(단락 평가)으로 대용량에서 최적")
 
     print("\n" + "=" * 70)
