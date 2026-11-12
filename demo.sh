@@ -212,11 +212,11 @@ try:
     print("\n[SQL 원문]\nPRAGMA foreign_keys = ON;\n")
     conn.execute("PRAGMA foreign_keys = ON;")
     print("[실행 결과] 외래키 제약 검사 활성화 요청 완료")
-    enabled = show("PRAGMA foreign_keys;")[0][0]
+    enabled = conn.execute("PRAGMA foreign_keys;").fetchone()[0]
     if enabled != 1:
         raise RuntimeError("외래키 검사가 활성화되지 않았습니다")
 
-    before = show("SELECT COUNT(*) AS rental_count FROM rentals;")[0][0]
+    before = conn.execute("SELECT COUNT(*) AS rental_count FROM rentals;").fetchone()[0]
     show("SELECT member_id FROM members WHERE member_id = 999;")
 
     invalid_sql = (
@@ -234,9 +234,9 @@ try:
         conn.rollback()
         raise RuntimeError("FAIL: 존재하지 않는 외래키 INSERT가 허용되었습니다")
 
-    after = show("SELECT COUNT(*) AS rental_count FROM rentals;")[0][0]
+    after = conn.execute("SELECT COUNT(*) AS rental_count FROM rentals;").fetchone()[0]
     invalid_rows = show("SELECT * FROM rentals WHERE member_id = 999;")
-    violations = show("PRAGMA foreign_key_check;")
+    violations = conn.execute("PRAGMA foreign_key_check;").fetchall()
     if before != after or invalid_rows or violations:
         raise RuntimeError("FAIL: 외래키 차단 후 데이터 검증 실패")
     print(f"\n[검증] 대여 건수 {before} → {after}, 잘못된 행 0건, 외래키 위반 0건: PASS")
