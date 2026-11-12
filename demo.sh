@@ -177,7 +177,7 @@ for title,labels in waves:
    print("Q15 변경 전/후 검증 PASS")
   else:
    cur=c.execute(stmt);rows=cur.fetchall()
-   print("[결과] "+" | ".join(x[0] for x in cur.description))
+   print("[결과]\n\n"+" | ".join(x[0] for x in cur.description))
    for row in rows:print(" | ".join("NULL" if v is None else str(v) for v in row))
    print(f"반환 {len(rows)}행")
 c.commit()
@@ -201,7 +201,7 @@ def show(sql):
     print("\n[SQL 원문]\n" + sql + "\n", flush=True)
     cur = conn.execute(sql)
     rows = cur.fetchall()
-    print("[실행 결과]")
+    print("[실행 결과]\n")
     print(" | ".join(d[0] for d in cur.description))
     for row in rows:
         print(" | ".join("NULL" if v is None else str(v) for v in row))
