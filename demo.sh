@@ -243,7 +243,7 @@ try:
 finally:
     conn.close()
 PY
-echo -e "\${GREEN}✔ SQLite 엔진의 FK 위반 오류와 INSERT 전후 데이터 불변을 검증했습니다.\${NC}"
+echo -e "${GREEN}✔ SQLite 엔진의 FK 위반 오류와 INSERT 전후 데이터 불변을 검증했습니다.${NC}"
 
 pause_step
 
