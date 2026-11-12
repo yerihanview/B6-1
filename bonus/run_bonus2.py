@@ -13,6 +13,26 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 SCHEMA_PATH = os.path.join(BASE_DIR, "sql", "schema.sql")
 SEED_PATH = os.path.join(BASE_DIR, "sql", "seed.sql")
 
+def show_select(conn, sql):
+    print("\n[SQL 원문]\n" + sql.strip() + "\n")
+    cur = conn.execute(sql)
+    rows = cur.fetchall()
+    print("[실행 결과]")
+    print(" | ".join(col[0] for col in cur.description))
+    for row in rows:
+        print(" | ".join("NULL" if value is None else str(value) for value in row))
+    print(f"반환 {len(rows)}행")
+    return rows
+
+def set_fk(conn, enabled):
+    sql = "PRAGMA foreign_keys = " + ("ON" if enabled else "OFF") + ";"
+    print("\n[SQL 원문]\n" + sql + "\n")
+    conn.execute(sql)
+    print("[실행 결과] 외래키 검사 설정 변경 요청")
+    state = show_select(conn, "PRAGMA foreign_keys;")[0][0]
+    if state != int(enabled):
+        raise RuntimeError("외래키 검사 설정이 적용되지 않았습니다")
+
 def main():
     print("=" * 70)
     print(" 🎁 [보너스 2] 외래키 참조 무결성 파괴 실증 (존재하지 않는 member_id=999)")
@@ -26,23 +46,29 @@ def main():
     # 1. 외래키 활성화 (PRAGMA foreign_keys = ON) 실증
     print("\n[시나리오 1] 외래키 활성화 상태 (정상 시스템 — PRAGMA foreign_keys = ON)")
     conn_on = sqlite3.connect(":memory:")
-    conn_on.execute("PRAGMA foreign_keys = ON;")
+    set_fk(conn_on, True)
     with open(SCHEMA_PATH, encoding="utf-8") as f:
         conn_on.executescript(f.read())
     with open(SEED_PATH, encoding="utf-8") as f:
         conn_on.executescript(f.read())
 
-    before_count = conn_on.execute("SELECT COUNT(*) FROM rentals;").fetchone()[0]
+    before_count = show_select(conn_on, "SELECT COUNT(*) AS rental_count FROM rentals;")[0][0]
+    show_select(conn_on, "SELECT member_id FROM members WHERE member_id = 999;")
     print(f"  - 초기 rentals 행 수: {before_count}행")
     print("  - 유령 회원(member_id=999) 대여 레코드 삽입 시도...")
 
+    print("\n[SQL 원문]\n" + invalid_sql + "\n")
     try:
         conn_on.execute(invalid_sql)
-        print("  ❌ [치명적 결함] 외래키 검사가 실패하여 유령 데이터가 삽입되었습니다!")
+        conn_on.rollback()
+        raise RuntimeError("FK ON 상태에서 잘못된 INSERT가 허용되었습니다")
     except sqlite3.IntegrityError as e:
-        print(f"  ✔ [정상 차단] {type(e).__name__}: {e}")
+        print(f"[SQLite 엔진 오류 / 실행 결과] {type(e).__name__}: {e}")
 
-    after_count = conn_on.execute("SELECT COUNT(*) FROM rentals;").fetchone()[0]
+    after_count = show_select(conn_on, "SELECT COUNT(*) AS rental_count FROM rentals;")[0][0]
+    rejected = show_select(conn_on, "SELECT * FROM rentals WHERE member_id = 999;")
+    if after_count != before_count or rejected:
+        raise RuntimeError("FK ON 데이터 무결성 검증 실패")
     print(f"  - 시도 후 rentals 행 수: {after_count}행 (데이터 무결성 100% 보존)")
 
     # 2. 외래키 비활성화 (PRAGMA foreign_keys = OFF) 대조 실증
@@ -53,12 +79,19 @@ def main():
     with open(SEED_PATH, encoding="utf-8") as f:
         conn_off.executescript(f.read())
     # 스키마 로드 후 명시적으로 외래키를 꺼서 취약한 환경 재현
-    conn_off.execute("PRAGMA foreign_keys = OFF;")
+    set_fk(conn_off, False)
 
     print("  - FK OFF 상태에서 동일한 유령 회원(member_id=999) 레코드 삽입...")
+    before_off = show_select(conn_off, "SELECT COUNT(*) AS rental_count FROM rentals;")[0][0]
+    print("\n[SQL 원문]\n" + invalid_sql + "\n")
     conn_off.execute(invalid_sql)
-    off_count = conn_off.execute("SELECT COUNT(*) FROM rentals;").fetchone()[0]
-    orphan_row = conn_off.execute("SELECT rental_id, member_id, book_id, rental_date FROM rentals WHERE member_id = 999;").fetchone()
+    print("[실행 결과] INSERT 성공 (FK OFF)")
+    off_count = show_select(conn_off, "SELECT COUNT(*) AS rental_count FROM rentals;")[0][0]
+    orphan_rows = show_select(conn_off, "SELECT rental_id, member_id, book_id, rental_date FROM rentals WHERE member_id = 999;")
+    show_select(conn_off, "PRAGMA foreign_key_check;")
+    if off_count != before_off + 1 or len(orphan_rows) != 1:
+        raise RuntimeError("FK OFF 시나리오 검증 실패")
+    orphan_row = orphan_rows[0]
     print(f"  - FK OFF 시 행 수: {off_count}행 (유령 데이터 삽입 허용됨!)")
     print(f"  - 삽입된 고아 레코드: {orphan_row} (부모 없는 데이터 오염 발생)")
 
