@@ -22,6 +22,17 @@ def init_db():
         conn.executescript(f.read())
     return conn
 
+def show_query(conn, sql):
+    print("\n[SQL 원문]\n" + sql.strip() + "\n")
+    cur = conn.execute(sql)
+    rows = cur.fetchall()
+    print("[실행 결과]")
+    print(" | ".join(column[0] for column in cur.description))
+    for row in rows:
+        print(" | ".join("NULL" if value is None else str(value) for value in row))
+    print(f"반환 {len(rows)}행")
+    return rows
+
 def main():
     print("=" * 70)
     print(" 🎁 [보너스 3] 도서관 운영 경영진 3대 KPI 실측 지표 리포트")
@@ -42,11 +53,7 @@ def main():
     GROUP BY strftime('%Y-%m', rental_date)
     ORDER BY 대여월;
     """
-    rows_kpi1 = conn.execute(sql_kpi1).fetchall()
-    print("  대여월    | 대여건수 | 전체도서 | 대여회전율")
-    print("  -----------------------------------------")
-    for r in rows_kpi1:
-        print(f"  {r[0]}   | {r[1]:^8} | {r[2]:^8} | {r[3]:^10}")
+    rows_kpi1 = show_query(conn, sql_kpi1)
     print("  ※ 해석: 2월, 3월, 7월, 10월에 회전율이 0.1538로 가장 활발하게 대여됨.")
 
     # KPI-2: 최다 대여 도서 TOP 3
@@ -64,11 +71,7 @@ def main():
     ORDER BY 대여횟수 DESC, b.book_id ASC
     LIMIT 3;
     """
-    rows_kpi2 = conn.execute(sql_kpi2).fetchall()
-    print("  도서ID | 도서명           | 카테고리 | 대여횟수")
-    print("  ---------------------------------------------")
-    for r in rows_kpi2:
-        print(f"  {r[0]:^6} | {r[1]:<16} | {r[2]:<8} | {r[3]:^8}")
+    rows_kpi2 = show_query(conn, sql_kpi2)
     print("  ※ 해석: '채식주의자(소설)', '아몬드(소설)', '총 균 쇠(역사)'가 각 2회로 최다 대여 기록.")
 
     # KPI-3: 회원 연체율 분석
@@ -80,7 +83,7 @@ def main():
         ROUND(CAST(SUM(CASE WHEN status = 'OVERDUE' THEN 1 ELSE 0 END) AS REAL) / COUNT(*) * 100, 1) AS 전체연체율
     FROM rentals;
     """
-    overall = conn.execute(sql_kpi3_overall).fetchone()
+    overall = show_query(conn, sql_kpi3_overall)[0]
     print(f"  - 전체 대여 건수: {overall[0]}건 | 현재 연체 건수: {overall[1]}건")
     print(f"  - 도서관 전체 연체율: {overall[2]}% (경보 기준치 20% 초과 ➔ 집중 관리 필요)")
 
@@ -97,12 +100,7 @@ def main():
     HAVING SUM(CASE WHEN r.status = 'OVERDUE' THEN 1 ELSE 0 END) > 0
     ORDER BY 연체건수 DESC;
     """
-    rows_kpi3 = conn.execute(sql_kpi3_members).fetchall()
-    print("  회원명 | 연락처          | 총대여 | 연체건수")
-    print("  -----------------------------------------")
-    for r in rows_kpi3:
-        print(f"  {r[0]:<6} | {r[1]:<14} | {r[2]:^6} | {r[3]:^8}")
-
+    rows_kpi3 = show_query(conn, sql_kpi3_members)
     print("\n" + "=" * 70)
     print(" 💡 [운영 개선 제언]")
     print("  1. 인기 도서(소설/역사) 복본 확충으로 대여 대기 시간 단축")
