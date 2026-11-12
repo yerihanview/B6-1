@@ -26,7 +26,7 @@ def show_query(conn, sql):
     print("\n[SQL 원문]\n" + sql.strip() + "\n")
     cur = conn.execute(sql)
     rows = cur.fetchall()
-    print("[실행 결과]")
+    print("[실행 결과]\n")
     print(" | ".join(col[0] for col in cur.description))
     for row in rows:
         print(" | ".join("NULL" if x is None else str(x) for x in row))
