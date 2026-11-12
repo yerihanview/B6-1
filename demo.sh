@@ -138,7 +138,7 @@ waves=[
  ("Wave 5. UPDATE / DELETE",["Q14","Q15"])
 ]
 def show(q):
- print("\nSQL> "+q,flush=True)
+ print("\nSQL> "+q+"\n",flush=True)
  cur=c.execute(q);rows=cur.fetchall()
  print(" | ".join(x[0] for x in cur.description))
  for row in rows:print(" | ".join("NULL" if v is None else str(v) for v in row))
