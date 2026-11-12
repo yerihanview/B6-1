@@ -29,7 +29,7 @@ def set_fk(conn, enabled):
     print("\n[SQL 원문]\n" + sql + "\n")
     conn.execute(sql)
     print("[실행 결과] 외래키 검사 설정 변경 요청")
-    state = show_select(conn, "PRAGMA foreign_keys;")[0][0]
+    state = conn.execute("PRAGMA foreign_keys;").fetchone()[0]
     if state != int(enabled):
         raise RuntimeError("외래키 검사 설정이 적용되지 않았습니다")
 
@@ -52,7 +52,7 @@ def main():
     with open(SEED_PATH, encoding="utf-8") as f:
         conn_on.executescript(f.read())
 
-    before_count = show_select(conn_on, "SELECT COUNT(*) AS rental_count FROM rentals;")[0][0]
+    before_count = conn_on.execute("SELECT COUNT(*) AS rental_count FROM rentals;").fetchone()[0]
     show_select(conn_on, "SELECT member_id FROM members WHERE member_id = 999;")
     print(f"  - 초기 rentals 행 수: {before_count}행")
     print("  - 유령 회원(member_id=999) 대여 레코드 삽입 시도...")
@@ -65,7 +65,7 @@ def main():
     except sqlite3.IntegrityError as e:
         print(f"[SQLite 엔진 오류 / 실행 결과] {type(e).__name__}: {e}")
 
-    after_count = show_select(conn_on, "SELECT COUNT(*) AS rental_count FROM rentals;")[0][0]
+    after_count = conn_on.execute("SELECT COUNT(*) AS rental_count FROM rentals;").fetchone()[0]
     rejected = show_select(conn_on, "SELECT * FROM rentals WHERE member_id = 999;")
     if after_count != before_count or rejected:
         raise RuntimeError("FK ON 데이터 무결성 검증 실패")
@@ -82,14 +82,14 @@ def main():
     set_fk(conn_off, False)
 
     print("  - FK OFF 상태에서 동일한 유령 회원(member_id=999) 레코드 삽입...")
-    before_off = show_select(conn_off, "SELECT COUNT(*) AS rental_count FROM rentals;")[0][0]
+    before_off = conn_off.execute("SELECT COUNT(*) AS rental_count FROM rentals;").fetchone()[0]
     print("\n[SQL 원문]\n" + invalid_sql + "\n")
     conn_off.execute(invalid_sql)
     print("[실행 결과] INSERT 성공 (FK OFF)")
-    off_count = show_select(conn_off, "SELECT COUNT(*) AS rental_count FROM rentals;")[0][0]
+    off_count = conn_off.execute("SELECT COUNT(*) AS rental_count FROM rentals;").fetchone()[0]
     orphan_rows = show_select(conn_off, "SELECT rental_id, member_id, book_id, rental_date FROM rentals WHERE member_id = 999;")
-    show_select(conn_off, "PRAGMA foreign_key_check;")
-    if off_count != before_off + 1 or len(orphan_rows) != 1:
+    violations = conn_off.execute("PRAGMA foreign_key_check;").fetchall()
+    if off_count != before_off + 1 or len(orphan_rows) != 1 or not violations:
         raise RuntimeError("FK OFF 시나리오 검증 실패")
     orphan_row = orphan_rows[0]
     print(f"  - FK OFF 시 행 수: {off_count}행 (유령 데이터 삽입 허용됨!)")
