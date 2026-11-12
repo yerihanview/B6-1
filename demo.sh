@@ -267,5 +267,14 @@ echo -e "\n${YELLOW}[보너스 3] python3 bonus/run_bonus3.py (경영진 3대 KP
 echo ""
 echo -e "${BOLD}${CYAN}======================================================================${NC}"
 echo -e "${BOLD}${CYAN} ✅ 5단계 시연 완료 — 15대 쿼리 및 보너스 3종 실행이 완벽히 시연되었습니다.${NC}"
-echo -e "${BOLD}${CYAN}    임시 DB(${DEMO_DIR})는 종료와 함께 자동 삭제됩니다.${NC}"
+echo -e "${BOLD}${CYAN}    임시 DB: ${DEMO_DIR}${NC}"
 echo -e "${BOLD}${CYAN}======================================================================${NC}"
+
+echo ""
+if [ "$INTERACTIVE" -eq 1 ] && [ -t 0 ]; then
+    echo -e "${YELLOW}▶ [엔터(Enter)]를 누르면 임시 DB가 삭제되고 시연을 종료합니다...${NC}"
+    read -r
+else
+    echo -e "${CYAN}▶ (비대화형 모드 — 임시 DB 자동 삭제)${NC}"
+fi
+echo -e "${GREEN}✔ 시연 종료 — 임시 DB를 정리합니다.${NC}"
