@@ -155,7 +155,7 @@ for title,labels in waves:
  for label in labels:
   pause(label)
   purpose,stmt=blocks[label]
-  print(f"\n[{label}] {purpose}\n[SQL 원문]\n{stmt}",flush=True)
+  print(f"\n[{label}] {purpose}\n[SQL 원문]\n{stmt}\n",flush=True)
   if label=="Q14":
    before=show("SELECT rental_id,member_id,book_id,due_date,return_date,status FROM rentals WHERE return_date IS NULL AND due_date < '2026-11-10' AND status='RENTED' ORDER BY rental_id;")
    n=c.execute(stmt).rowcount;print(f"갱신 행 수: {n}")
