@@ -54,8 +54,6 @@ def main():
 
     before_count = conn_on.execute("SELECT COUNT(*) AS rental_count FROM rentals;").fetchone()[0]
     show_select(conn_on, "SELECT member_id FROM members WHERE member_id = 999;")
-    print(f"  - 초기 rentals 행 수: {before_count}행")
-    print("  - 유령 회원(member_id=999) 대여 레코드 삽입 시도...")
 
     print("\n[SQL 원문]\n" + invalid_sql + "\n")
     try:
@@ -81,7 +79,6 @@ def main():
     # 스키마 로드 후 명시적으로 외래키를 꺼서 취약한 환경 재현
     set_fk(conn_off, False)
 
-    print("  - FK OFF 상태에서 동일한 유령 회원(member_id=999) 레코드 삽입...")
     before_off = conn_off.execute("SELECT COUNT(*) AS rental_count FROM rentals;").fetchone()[0]
     print("\n[SQL 원문]\n" + invalid_sql + "\n")
     conn_off.execute(invalid_sql)
@@ -92,7 +89,6 @@ def main():
     if off_count != before_off + 1 or len(orphan_rows) != 1 or not violations:
         raise RuntimeError("FK OFF 시나리오 검증 실패")
     orphan_row = orphan_rows[0]
-    print(f"  - FK OFF 시 행 수: {off_count}행 (유령 데이터 삽입 허용됨!)")
     print(f"  - 삽입된 고아 레코드: {orphan_row} (부모 없는 데이터 오염 발생)")
 
     print("\n" + "=" * 70)
