@@ -95,9 +95,6 @@ def show(q):
 show("PRAGMA foreign_keys;")
 show("SELECT name, sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name;")
 show("SELECT name, sql FROM sqlite_master WHERE type='index' AND name NOT LIKE 'sqlite_autoindex_%';")
-for t in ("categories","members","books","rentals"):
- show(f"PRAGMA table_info({t});")
- show(f"PRAGMA foreign_key_list({t});")
 c.close()
 PY
 pause_step
