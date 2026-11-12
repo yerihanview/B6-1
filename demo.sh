@@ -158,14 +158,18 @@ for title,labels in waves:
   print(f"\n[{label}] {purpose}\n[SQL 원문]\n{stmt}\n",flush=True)
   if label=="Q14":
    before=show("SELECT rental_id,member_id,book_id,due_date,return_date,status FROM rentals WHERE return_date IS NULL AND due_date < '2026-11-10' AND status='RENTED' ORDER BY rental_id;")
-   n=c.execute(stmt).rowcount;print(f"갱신 행 수: {n}")
+   c.execute(stmt)
+   n=c.execute("SELECT changes();").fetchone()[0]
+   print(f"갱신 행 수: {n}")
    ids=[r[0] for r in before]
    after=show("SELECT rental_id,member_id,book_id,due_date,return_date,status FROM rentals WHERE rental_id IN ("+",".join(map(str,ids))+") ORDER BY rental_id;") if ids else []
    if n!=len(before) or len(after)!=len(before) or any(r[-1]!="OVERDUE" for r in after):raise RuntimeError("Q14 변경 검증 실패")
    print("Q14 변경 전/후 검증 PASS")
   elif label=="Q15":
    before=show("SELECT * FROM rentals WHERE rental_id=(SELECT rental_id FROM rentals WHERE member_id=10 ORDER BY rental_date DESC LIMIT 1);")
-   n=c.execute(stmt).rowcount;print(f"삭제 행 수: {n}")
+   c.execute(stmt)
+   n=c.execute("SELECT changes();").fetchone()[0]
+   print(f"삭제 행 수: {n}")
    if n!=len(before):raise RuntimeError("Q15 삭제 행 수 불일치")
    for row in before:
     if show(f"SELECT * FROM rentals WHERE rental_id={int(row[0])};"):raise RuntimeError("Q15 삭제 검증 실패")
