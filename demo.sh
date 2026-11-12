@@ -192,26 +192,58 @@ echo "✔ SQL 15개 및 전체 결과 출력, Q14/Q15 전후 검증 완료"
 pause_step
 
 step_banner "Step 4 / 5 — 외래키 무결성 파괴 실증 (유령 member_id=999)"
-echo -e "${YELLOW}\$ python3 -c \"INSERT INTO rentals(member_id=999, ...)\"${NC}"
 "$PYTHON" - "$DB" <<'PY'
 import sqlite3, sys
+
 conn = sqlite3.connect(sys.argv[1])
-conn.execute("PRAGMA foreign_keys = ON;")
-before = conn.execute("SELECT COUNT(*) FROM rentals;").fetchone()[0]
+
+def show(sql):
+    print("\n[SQL 원문]\n" + sql + "\n", flush=True)
+    cur = conn.execute(sql)
+    rows = cur.fetchall()
+    print("[실행 결과]")
+    print(" | ".join(d[0] for d in cur.description))
+    for row in rows:
+        print(" | ".join("NULL" if v is None else str(v) for v in row))
+    print(f"반환 {len(rows)}행")
+    return rows
+
 try:
-    conn.execute(
-        "INSERT INTO rentals (member_id, book_id, rental_date, due_date, status) "
-        "VALUES (999, 1, '2026-11-10', '2026-11-24', 'RENTED');")
-    print("FAIL: 유령 외래키가 삽입되었습니다 (FK 강제 꺼짐)")
-    sys.exit(1)
-except sqlite3.IntegrityError as e:
-    print(f"  차단됨 → sqlite3.IntegrityError: {e}")
-after = conn.execute("SELECT COUNT(*) FROM rentals;").fetchone()[0]
-print(f"  rentals 행 수: {before} → {after} (변화 없음)")
-print("  PRAGMA foreign_keys =", conn.execute("PRAGMA foreign_keys;").fetchone()[0])
-conn.close()
+    print("\n[SQL 원문]\nPRAGMA foreign_keys = ON;\n")
+    conn.execute("PRAGMA foreign_keys = ON;")
+    print("[실행 결과] 외래키 제약 검사 활성화 요청 완료")
+    enabled = show("PRAGMA foreign_keys;")[0][0]
+    if enabled != 1:
+        raise RuntimeError("외래키 검사가 활성화되지 않았습니다")
+
+    before = show("SELECT COUNT(*) AS rental_count FROM rentals;")[0][0]
+    show("SELECT member_id FROM members WHERE member_id = 999;")
+
+    invalid_sql = (
+        "INSERT INTO rentals (member_id, book_id, rental_date, due_date, status)\n"
+        "VALUES (999, 1, '2026-11-10', '2026-11-24', 'RENTED');"
+    )
+    print("\n[SQL 원문]\n" + invalid_sql + "\n", flush=True)
+    try:
+        conn.execute(invalid_sql)
+    except sqlite3.IntegrityError as error:
+        print("[SQLite 엔진 오류 / 실행 결과]")
+        print(f"{type(error).__name__}: {error}")
+        print("→ DB 엔진이 외래키 제약을 위반한 INSERT를 거부함")
+    else:
+        conn.rollback()
+        raise RuntimeError("FAIL: 존재하지 않는 외래키 INSERT가 허용되었습니다")
+
+    after = show("SELECT COUNT(*) AS rental_count FROM rentals;")[0][0]
+    invalid_rows = show("SELECT * FROM rentals WHERE member_id = 999;")
+    violations = show("PRAGMA foreign_key_check;")
+    if before != after or invalid_rows or violations:
+        raise RuntimeError("FAIL: 외래키 차단 후 데이터 검증 실패")
+    print(f"\n[검증] 대여 건수 {before} → {after}, 잘못된 행 0건, 외래키 위반 0건: PASS")
+finally:
+    conn.close()
 PY
-echo -e "${GREEN}✔ 존재하지 않는 부모를 참조하는 INSERT가 DB 레벨에서 거부되었습니다.${NC}"
+echo -e "\${GREEN}✔ SQLite 엔진의 FK 위반 오류와 INSERT 전후 데이터 불변을 검증했습니다.\${NC}"
 
 pause_step
 
